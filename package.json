@@ -1,0 +1,14 @@
+{
+  "name": "facilitador",
+  "version": "1.0.0",
+  "description": "Baixador e conversor de midia local (yt-dlp + ffmpeg)",
+  "main": "server.js",
+  "scripts": {
+    "setup": "node setup.js",
+    "update": "node setup.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0"
+  }
+}

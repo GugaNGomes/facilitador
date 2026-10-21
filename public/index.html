@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Facilitador</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M16 7v12m0 0l-5-5m5 5l5-5M9 24h14' stroke='white' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg:#f4f5f9; --card:#fff; --soft:#f1f2f7; --text:#171a21; --muted:#667085; --line:#e2e5ec;
+    --accent:#4f46e5; --accent-h:#4338ca; --accent-t:#fff; --accent-soft:#eef0ff;
+    --err:#b42318; --err-bg:#fef3f2; --ok:#067647; --ok-bg:#ecfdf3; --warn-bg:#fffaeb; --warn:#93370d;
+    --shadow:0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.06);
+    --r:14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#0f1115; --card:#171a21; --soft:#1e222b; --text:#eef0f4; --muted:#9aa3b2; --line:#2a2f3a;
+      --accent:#818cf8; --accent-h:#a5b4fc; --accent-t:#0f1115; --accent-soft:#222645;
+      --err:#fda29b; --err-bg:#2a1715; --ok:#6ce9a6; --ok-bg:#12251b; --warn-bg:#2a2112; --warn:#fec84b;
+      --shadow:none;
+    }
+  }
+  * { box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; min-height:100vh; }
+  main { max-width:680px; margin:0 auto; padding:28px 16px 48px; }
+  button, input, select { font:inherit; color:inherit; }
+  button { cursor:pointer; }
+  :focus-visible { outline:3px solid color-mix(in srgb, var(--accent) 55%, transparent); outline-offset:2px; }
+  .sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  .hidden { display:none !important; }
+  svg { width:20px; height:20px; flex:none; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+  /* header */
+  header { display:flex; align-items:center; gap:12px; margin-bottom:22px; }
+  .logo { width:44px; height:44px; border-radius:12px; background:var(--accent); color:var(--accent-t); display:grid; place-items:center; }
+  .logo svg { width:24px; height:24px; stroke-width:2.5; }
+  h1 { font-size:1.35rem; line-height:1.2; margin:0; }
+  .sub { color:var(--muted); margin:2px 0 0; font-size:.92rem; }
+
+  .banner { display:flex; gap:10px; align-items:flex-start; background:var(--warn-bg); color:var(--warn); border-radius:10px; padding:12px 14px; margin-bottom:16px; font-size:.92rem; }
+  .banner code { background:rgba(0,0,0,.08); padding:1px 6px; border-radius:6px; }
+
+  /* tabs */
+  .tabs { display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; background:var(--soft); border-radius:12px; margin-bottom:16px; }
+  .tab { display:flex; align-items:center; justify-content:center; gap:8px; min-height:44px; border:0; border-radius:9px; background:transparent; color:var(--muted); font-weight:600; transition:background .15s,color .15s; }
+  .tab:hover { color:var(--text); }
+  .tab[aria-selected=true] { background:var(--card); color:var(--text); box-shadow:0 1px 3px rgba(16,24,40,.12); }
+  .tab[aria-selected=true] svg { color:var(--accent); }
+  .dot { width:8px; height:8px; border-radius:50%; background:var(--accent); animation:pulse 1.2s infinite; }
+
+  .card { background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:20px; box-shadow:var(--shadow); }
+  .step-title { font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:22px 0 10px; }
+  .card > .step-title:first-child { margin-top:0; }
+  .hint { color:var(--muted); font-size:.85rem; margin:8px 0 0; }
+
+  /* url field */
+  .field { display:flex; align-items:center; gap:6px; border:1.5px solid var(--line); border-radius:12px; background:var(--bg); padding:4px 4px 4px 12px; transition:border-color .15s, box-shadow .15s; }
+  .field:focus-within { border-color:var(--accent); box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); }
+  .field.bad { border-color:var(--err); }
+  .field > svg { color:var(--muted); }
+  .field input { flex:1; min-width:0; border:0; background:transparent; padding:10px 4px; outline:0; }
+  .field input::placeholder { color:var(--muted); }
+  .iconbtn { display:grid; place-items:center; width:40px; height:40px; border:0; border-radius:9px; background:transparent; color:var(--muted); }
+  .iconbtn:hover { background:var(--soft); color:var(--text); }
+
+  /* buttons */
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 18px; border:0; border-radius:10px; background:var(--accent); color:var(--accent-t); font-weight:600; transition:background .15s, transform .05s; }
+  .btn:hover:not(:disabled) { background:var(--accent-h); }
+  .btn:active:not(:disabled) { transform:translateY(1px); }
+  .btn:disabled { opacity:.45; cursor:not-allowed; }
+  .btn.block { width:100%; min-height:50px; font-size:1.02rem; margin-top:20px; }
+  .btn.ghost { background:var(--soft); color:var(--text); }
+  .btn.ghost:hover:not(:disabled) { background:var(--line); }
+  .btn.small { min-height:36px; padding:0 14px; font-size:.9rem; }
+  .spinner { width:18px; height:18px; border-radius:50%; border:2.5px solid color-mix(in srgb, currentColor 25%, transparent); border-top-color:currentColor; animation:spin .8s linear infinite; flex:none; }
+
+  /* preview */
+  .preview { display:flex; gap:14px; align-items:center; margin-top:18px; padding-top:18px; border-top:1px solid var(--line); }
+  .thumb { position:relative; width:140px; flex:none; aspect-ratio:16/9; border-radius:10px; overflow:hidden; background:var(--soft); }
+  .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+  .thumb .dur { position:absolute; right:6px; bottom:6px; background:rgba(0,0,0,.78); color:#fff; font-size:.75rem; padding:1px 6px; border-radius:5px; font-variant-numeric:tabular-nums; }
+  .preview b { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.35; }
+  .preview small { color:var(--muted); display:block; margin-top:4px; }
+  .skel { background:linear-gradient(90deg,var(--soft) 25%,var(--line) 50%,var(--soft) 75%); background-size:200% 100%; animation:shimmer 1.3s infinite; border-radius:8px; }
+  .skel.line { height:14px; margin-bottom:10px; }
+
+  /* chips */
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { position:relative; }
+  .chip span { display:flex; flex-direction:column; justify-content:center; min-height:44px; padding:6px 16px; border:1.5px solid var(--line); border-radius:10px; background:var(--card); cursor:pointer; transition:border-color .15s, background .15s; user-select:none; }
+  .chip span small { color:var(--muted); font-size:.75rem; font-weight:400; line-height:1.2; }
+  .chip span { font-weight:600; line-height:1.25; }
+  .chip:hover span { border-color:color-mix(in srgb, var(--accent) 50%, var(--line)); }
+  .chip input:checked + span { border-color:var(--accent); background:var(--accent-soft); box-shadow:inset 0 0 0 1px var(--accent); }
+  .chip input:focus-visible + span { outline:3px solid color-mix(in srgb, var(--accent) 55%, transparent); outline-offset:2px; }
+  .chips.big .chip { flex:1 1 180px; }
+  .chips.big .chip span { min-height:60px; padding:10px 16px; }
+  details.more { margin-top:12px; }
+  details.more summary { cursor:pointer; color:var(--muted); font-size:.88rem; padding:6px 0; width:fit-content; }
+  details.more summary:hover { color:var(--text); }
+  details.more .chips { margin-top:8px; }
+
+  /* tasks */
+  .panel { margin-top:18px; border-radius:12px; padding:14px 16px; }
+  .task { background:var(--soft); }
+  .task-head { display:flex; align-items:center; gap:12px; }
+  .task-head > div { flex:1; min-width:0; }
+  .task-head b { display:block; }
+  .task-head small { color:var(--muted); }
+  .pct { font-weight:700; font-variant-numeric:tabular-nums; }
+  .bar { height:8px; background:var(--line); border-radius:4px; overflow:hidden; margin-top:12px; }
+  .bar i { display:block; height:100%; width:0; background:var(--accent); border-radius:4px; transition:width .4s ease; }
+  .bar.busy i { background-image:linear-gradient(45deg,rgba(255,255,255,.28) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.28) 50%,rgba(255,255,255,.28) 75%,transparent 75%); background-size:20px 20px; animation:stripes .8s linear infinite; }
+  .done { background:var(--ok-bg); color:var(--ok); }
+  .done .row1 { display:flex; align-items:center; gap:12px; }
+  .done .row1 > div { flex:1; min-width:0; }
+  .done b { display:block; color:var(--text); overflow-wrap:anywhere; }
+  .done small { color:var(--muted); }
+  .done .check { flex:none; width:36px; height:36px; border-radius:50%; background:var(--ok); color:var(--card); display:grid; place-items:center; }
+  .done .check svg { stroke-width:3; }
+  .actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .alert { background:var(--err-bg); color:var(--err); }
+  .alert .row1 { display:flex; gap:10px; align-items:flex-start; }
+  .alert .row1 > div { flex:1; min-width:0; }
+  .alert b { display:block; }
+  .alert p { margin:2px 0 0; color:var(--text); font-size:.92rem; }
+  .alert details { margin-top:8px; font-size:.8rem; }
+  .alert summary { cursor:pointer; color:var(--muted); }
+  .alert pre { white-space:pre-wrap; overflow-wrap:anywhere; margin:6px 0 0; color:var(--muted); font:inherit; font-family:ui-monospace,Consolas,monospace; font-size:.78rem; }
+
+  /* dropzone */
+  .drop { display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; padding:34px 16px; border:2px dashed var(--line); border-radius:12px; color:var(--muted); cursor:pointer; transition:border-color .15s, background .15s; }
+  .drop:hover, .drop.over { border-color:var(--accent); background:var(--accent-soft); color:var(--text); }
+  .drop svg { width:34px; height:34px; color:var(--accent); }
+  .drop b { color:var(--text); }
+  .filerow { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; background:var(--bg); }
+  .filerow .ficon { flex:none; width:42px; height:42px; border-radius:10px; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; }
+  .filerow > div { flex:1; min-width:0; }
+  .filerow b { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .filerow small { color:var(--muted); }
+  .selects { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .selects label { display:block; font-size:.82rem; color:var(--muted); margin-bottom:6px; }
+  select { width:100%; min-height:44px; padding:0 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--bg); }
+  .tip { display:flex; gap:8px; align-items:flex-start; margin-top:14px; padding:10px 12px; border-radius:10px; background:var(--soft); color:var(--muted); font-size:.85rem; }
+  .tip svg { width:16px; height:16px; margin-top:3px; color:var(--accent); }
+
+  .note { margin:20px 4px 0; font-size:.8rem; color:var(--muted); text-align:center; }
+  kbd { font:inherit; font-size:.8em; border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:0 5px; background:var(--card); }
+
+  /* arrastar arquivo em qualquer lugar */
+  #overlay { position:fixed; inset:0; z-index:10; display:grid; place-items:center; background:color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter:blur(3px); }
+  #overlay div { padding:40px 56px; border:3px dashed var(--accent); border-radius:20px; background:var(--card); font-weight:700; font-size:1.1rem; text-align:center; }
+
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @keyframes shimmer { to { background-position:-200% 0; } }
+  @keyframes stripes { to { background-position:20px 0; } }
+  @keyframes pulse { 50% { opacity:.3; } }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition:none !important; } }
+  @media (max-width:520px) {
+    main { padding-top:18px; }
+    .card { padding:16px; }
+    .preview { flex-direction:column; align-items:stretch; }
+    .thumb { width:100%; }
+    .tab .lbl-long { display:none; }
+    .field .btn { padding:0 14px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg></div>
+    <div>
+      <h1>Facilitador</h1>
+      <p class="sub">Baixe e converta vídeos e áudios, tudo no seu computador.</p>
+    </div>
+  </header>
+
+  <div class="banner hidden" id="banner" role="alert"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg><div id="bannerText"></div></div>
+
+  <div class="tabs" role="tablist" aria-label="Modo">
+    <button class="tab" role="tab" id="tab-dl" aria-controls="dl" aria-selected="true" data-tab="dl">
+      <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg>
+      <span>Baixar<span class="lbl-long"> de um link</span></span><i class="dot hidden" id="dot-dl" title="Em andamento"></i>
+    </button>
+    <button class="tab" role="tab" id="tab-cv" aria-controls="cv" aria-selected="false" tabindex="-1" data-tab="cv">
+      <svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 013-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 01-3 3H3"/></svg>
+      <span>Converter<span class="lbl-long"> arquivo</span></span><i class="dot hidden" id="dot-cv" title="Em andamento"></i>
+    </button>
+  </div>
+
+  <!-- ========== BAIXAR ========== -->
+  <section class="card" id="dl" role="tabpanel" aria-labelledby="tab-dl">
+    <div class="step-title">1 · Cole o link</div>
+    <div class="field" id="urlField">
+      <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg>
+      <input type="url" id="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Link do vídeo" aria-describedby="urlHint">
+      <button class="iconbtn" id="btnPaste" title="Colar da área de transferência" aria-label="Colar link"><svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2M9 2h6a1 1 0 011 1v2a1 1 0 01-1 1H9a1 1 0 01-1-1V3a1 1 0 011-1z"/></svg></button>
+      <button class="iconbtn hidden" id="btnClear" title="Limpar" aria-label="Limpar link"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      <button class="btn" id="btnInfo">Buscar</button>
+    </div>
+    <p class="hint" id="urlHint">YouTube, TikTok, Instagram, X e muitos outros. Ao colar, a busca começa sozinha.</p>
+
+    <div id="dlSearching" class="preview hidden" aria-live="polite">
+      <div class="thumb skel"></div>
+      <div style="flex:1">
+        <div class="skel line" style="width:90%"></div>
+        <div class="skel line" style="width:55%"></div>
+        <small id="searchMsg">Buscando informações…</small>
+      </div>
+    </div>
+
+    <div id="dlSearchErr" class="panel alert hidden" role="alert"></div>
+
+    <div id="dlFound" class="hidden">
+      <div class="preview">
+        <div class="thumb"><img id="thumb" alt="" referrerpolicy="no-referrer"><span class="dur hidden" id="dur"></span></div>
+        <div><b id="title"></b><small id="meta"></small></div>
+      </div>
+
+      <div id="dlOpts">
+        <div class="step-title">2 · Escolha o formato</div>
+        <div class="chips big" id="kindChips"></div>
+        <details class="more" id="moreFmt">
+          <summary>Outros formatos de áudio</summary>
+          <div class="chips" id="otherChips"></div>
+        </details>
+
+        <div id="qualityBox">
+          <div class="step-title" id="qualityTitle">Qualidade</div>
+          <div class="chips" id="qualityChips"></div>
+        </div>
+
+        <button class="btn block" id="btnDl">Baixar</button>
+      </div>
+    </div>
+
+    <div id="dlTask" class="panel task hidden" aria-live="polite"></div>
+    <div id="dlDone" class="panel done hidden"></div>
+    <div id="dlErr" class="panel alert hidden" role="alert"></div>
+  </section>
+
+  <!-- ========== CONVERTER ========== -->
+  <section class="card hidden" id="cv" role="tabpanel" aria-labelledby="tab-cv">
+    <div class="step-title">1 · Escolha o arquivo</div>
+    <div class="drop" id="drop" role="button" tabindex="0" aria-label="Escolher arquivo para converter">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      <span><b>Arraste um arquivo aqui</b> ou clique para escolher</span>
+      <small>Vídeo ou áudio · até <span id="maxMb">500</span> MB</small>
+    </div>
+    <div class="filerow hidden" id="fileRow">
+      <div class="ficon" id="fileIcon"></div>
+      <div><b id="fileName"></b><small id="fileMeta"></small></div>
+      <button class="btn ghost small" id="btnChange">Trocar</button>
+    </div>
+    <input type="file" id="file" class="sr" accept="video/*,audio/*,.mkv,.flac,.opus,.m4a,.wma,.aac" tabindex="-1">
+
+    <div id="cvOpts" class="hidden">
+      <div class="step-title">2 · Converter para</div>
+      <div class="chips" id="cvAudioChips" aria-label="Áudio"></div>
+      <div class="chips" id="cvVideoChips" style="margin-top:8px" aria-label="Vídeo"></div>
+
+      <div class="selects" id="cvSelects" style="margin-top:16px">
+        <div id="cvResBox"><label for="cvRes">Resolução</label>
+          <select id="cvRes">
+            <option value="">Original</option><option value="1080">1080p</option><option value="720">720p</option><option value="480">480p</option><option value="360">360p</option>
+          </select></div>
+        <div id="cvBrBox"><label for="cvBr">Qualidade do áudio</label>
+          <select id="cvBr">
+            <option value="320">320 kbps (máxima)</option><option value="192" selected>192 kbps (boa)</option><option value="128">128 kbps (menor arquivo)</option><option value="96">96 kbps (voz)</option>
+          </select></div>
+      </div>
+      <div class="tip" id="cvTip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span></span></div>
+
+      <button class="btn block" id="btnCv">Converter</button>
+    </div>
+
+    <div id="cvTask" class="panel task hidden" aria-live="polite"></div>
+    <div id="cvDone" class="panel done hidden"></div>
+    <div id="cvErr" class="panel alert hidden" role="alert"></div>
+  </section>
+
+  <p class="note">Use apenas para conteúdo seu ou que você tem permissão para baixar.</p>
+</main>
+
+<div id="overlay" class="hidden"><div>Solte o arquivo para converter</div></div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const store = {
+  get(k, d) { try { return localStorage.getItem('fac.' + k) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('fac.' + k, v); } catch {} },
+};
+const ICON = {
+  check: '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>',
+  warn: '<svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>',
+  video: '<svg viewBox="0 0 24 24"><rect x="2" y="5" width="14" height="14" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg>',
+  audio: '<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+};
+const SPIN = '<span class="spinner"></span>';
+let maxMb = 500;
+const busy = { dl: false, cv: false };
+
+// ---------- utilidades ----------
+function fmtDur(s) {
+  if (!s) return '';
+  s = Math.round(s);
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = String(s % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+}
+function fmtSize(b) {
+  if (!b) return '';
+  const u = ['B', 'KB', 'MB', 'GB']; let i = 0;
+  while (b >= 1024 && i < 3) { b /= 1024; i++; }
+  return (i > 1 ? b.toFixed(1) : Math.round(b)) + ' ' + u[i];
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+function normUrl(v) {
+  v = v.trim();
+  if (!v) return '';
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(v) && /^[\w-]+(\.[\w-]+)+(\/|$|\?)/.test(v)) v = 'https://' + v;
+  try { const u = new URL(v); return /^https?:$/.test(u.protocol) ? v : ''; } catch { return ''; }
+}
+function updateTitle() {
+  document.title = 'Facilitador';
+}
+window.addEventListener('beforeunload', (e) => { if (busy.dl || busy.cv) { e.preventDefault(); e.returnValue = ''; } });
+
+// erros do yt-dlp/ffmpeg -> mensagem humana (o texto original fica em "detalhes")
+function friendly(raw) {
+  const m = raw || '';
+  const rules = [
+    [/Sign in to confirm|not a bot|cookies/i, 'O site bloqueou o acesso automático', 'Isso acontece com o YouTube de vez em quando. Tente de novo em alguns minutos ou atualize o yt-dlp com "npm run update".'],
+    [/private video|Private|members-only|login required|Log in|requires authentication/i, 'Este vídeo é privado ou exige login', 'Só dá para baixar vídeos públicos.'],
+    [/Unsupported URL/i, 'Esse link não é suportado', 'Confira se é o link direto de um vídeo (e não de uma página de busca ou perfil).'],
+    [/unavailable|removed|does not exist|404|not found/i, 'Vídeo indisponível', 'Ele pode ter sido removido ou não estar disponível na sua região.'],
+    [/429|Too Many Requests/i, 'Muitas tentativas seguidas', 'Aguarde um pouco e tente novamente.'],
+    [/ffmpeg/i, 'O conversor (ffmpeg) não está disponível', 'Rode "npm install" no terminal e reinicie o Facilitador.'],
+    [/Tarefa expirada/i, 'O arquivo expirou', 'Os arquivos ficam disponíveis por 30 minutos. Refaça o processo.'],
+    [/Failed to fetch|NetworkError|Load failed/i, 'Sem conexão com o Facilitador', 'Verifique se ele ainda está rodando no terminal.'],
+    [/Arquivo maior/i, 'Arquivo grande demais', m],
+    [/Invalid data found|moov atom|could not find codec/i, 'Não consegui ler este arquivo', 'Ele pode estar corrompido ou em um formato incomum.'],
+  ];
+  for (const [re, title, text] of rules) if (re.test(m)) return { title, text, raw: m };
+  return { title: 'Algo deu errado', text: 'Tente novamente. Se repetir, veja os detalhes abaixo.', raw: m };
+}
+
+// ---------- grupo de chips (radio nativo = teclado e leitor de tela de graça) ----------
+function chipGroup(el, name, options, value, onChange) {
+  el.setAttribute('role', 'radiogroup');
+  el.innerHTML = '';
+  for (const o of options) {
+    const l = document.createElement('label');
+    l.className = 'chip';
+    l.innerHTML = `<input type="radio" class="sr" name="${name}" value="${esc(o.value)}"><span>${esc(o.label)}${o.sub ? `<small>${esc(o.sub)}</small>` : ''}</span>`;
+    const i = l.firstChild;
+    i.checked = String(o.value) === String(value);
+    i.onchange = () => onChange(o.value);
+    el.appendChild(l);
+  }
+}
+
+// ---------- painéis de estado (progresso / pronto / erro) ----------
+function panels(p) { return { task: $('#' + p + 'Task'), done: $('#' + p + 'Done'), err: $('#' + p + 'Err') }; }
+function clearPanels(p) { const x = panels(p); [x.task, x.done, x.err].forEach((e) => e.classList.add('hidden')); }
+
+function showTask(p, title) {
+  const { task, done, err } = panels(p);
+  done.classList.add('hidden'); err.classList.add('hidden');
+  task.innerHTML = `<div class="task-head">${SPIN}<div><b class="t"></b><small class="s"></small></div><span class="pct"></span></div>
+    <div class="bar busy" role="progressbar" aria-valuemin="0" aria-valuemax="100"><i></i></div>`;
+  task.querySelector('.t').textContent = title;
+  task.classList.remove('hidden');
+}
+function updateTask(p, j, t0) {
+  const task = panels(p).task;
+  const sec = Math.round((Date.now() - t0) / 1000);
+  task.querySelector('.t').textContent = j.stage.replace(/\.+$/, '');
+  task.querySelector('.s').textContent = (p === 'dl' ? 'Pode levar um minuto. Não feche esta aba.' : 'Não feche esta aba.') + ` · ${sec}s`;
+  task.querySelector('.pct').textContent = j.progress ? j.progress + '%' : '';
+  task.querySelector('.bar').setAttribute('aria-valuenow', j.progress);
+  task.querySelector('.bar i').style.width = Math.max(j.progress, 3) + '%';
+}
+function showDone(p, j, id, again) {
+  const { task, done } = panels(p);
+  task.classList.add('hidden');
+  const href = '/api/jobs/' + id + '/file';
+  done.innerHTML = `<div class="row1"><div class="check">${ICON.check}</div><div><b></b><small>${esc(fmtSize(j.size))}${j.size ? ' · ' : ''}Salvo na sua pasta de downloads</small></div></div>
+    <div class="actions"><a class="btn small" href="${href}" download>Baixar de novo</a><button class="btn ghost small" type="button">${esc(again)}</button></div>`;
+  done.querySelector('b').textContent = j.name;
+  done.querySelector('button').onclick = () => { clearPanels(p); if (p === 'dl') resetDownload(); else resetConvert(); };
+  done.classList.remove('hidden');
+  done.querySelector('a').focus({ preventScroll: true });
+  done.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+function showErr(target, e, retry) {
+  const f = friendly(e.message || String(e));
+  target.innerHTML = `<div class="row1">${ICON.warn}<div><b></b><p></p>${f.raw ? '<details><summary>Detalhes técnicos</summary><pre></pre></details>' : ''}</div></div>
+    ${retry ? '<div class="actions"><button class="btn small" type="button">Tentar de novo</button></div>' : ''}`;
+  target.querySelector('b').textContent = f.title;
+  target.querySelector('p').textContent = f.text;
+  const pre = target.querySelector('pre'); if (pre) pre.textContent = f.raw;
+  const b = target.querySelector('button'); if (b) b.onclick = retry;
+  target.classList.remove('hidden');
+  target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+async function post(url, body, signal) {
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || 'Erro');
+  return j;
+}
+
+// acompanha uma tarefa do servidor; tolera falhas curtas de rede
+async function run(p, id, startMsg) {
+  const t0 = Date.now(); let fails = 0;
+  showTask(p, startMsg);
+  for (;;) {
+    let j;
+    try {
+      const r = await fetch('/api/jobs/' + id);
+      j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'Erro');
+      fails = 0;
+    } catch (e) {
+      if (++fails > 5 || /expirada/.test(e.message)) throw e;
+      await new Promise((r) => setTimeout(r, 1000)); continue;
+    }
+    if (j.status === 'error') throw new Error(j.error);
+    if (j.status === 'done') { updateTask(p, { ...j, progress: 100 }, t0); return { j, id }; }
+    updateTask(p, j, t0);
+    document.title = (j.progress ? j.progress + '% · ' : '') + 'Facilitador';
+    await new Promise((r) => setTimeout(r, 600));
+  }
+}
+function triggerSave(id, name) {
+  const a = document.createElement('a');
+  a.href = '/api/jobs/' + id + '/file'; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function setBusy(p, on) {
+  busy[p] = on;
+  $('#dot-' + p).classList.toggle('hidden', !on);
+  if (p === 'dl') { $('#dlOpts').inert = on; $('#btnInfo').disabled = on; $('#url').disabled = on; }
+  else { $('#cvOpts').inert = on; $('#drop').inert = on; $('#btnChange').disabled = on; }
+  if (!on) updateTitle();
+}
+
+// ---------- abas ----------
+function selectTab(name, focus) {
+  document.querySelectorAll('.tab').forEach((t) => {
+    const on = t.dataset.tab === name;
+    t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1;
+    if (on && focus) t.focus();
+  });
+  $('#dl').classList.toggle('hidden', name !== 'dl');
+  $('#cv').classList.toggle('hidden', name !== 'cv');
+  store.set('tab', name);
+  history.replaceState(null, '', '#' + name);
+}
+document.querySelectorAll('.tab').forEach((t) => {
+  t.onclick = () => selectTab(t.dataset.tab);
+  t.onkeydown = (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') selectTab(t.dataset.tab === 'dl' ? 'cv' : 'dl', true);
+  };
+});
+
+// ---------- BAIXAR ----------
+const dl = { fmt: store.get('fmt', 'mp4'), q: { mp4: '', mp3: '192', m4a: '192', wav: '', opus: '' }, heights: [], url: '', ctl: null };
+if (!['mp4', 'mp3', 'm4a', 'wav', 'opus'].includes(dl.fmt)) dl.fmt = 'mp4';
+const FMT_NAME = { mp4: 'MP4', mp3: 'MP3', m4a: 'M4A', wav: 'WAV', opus: 'OPUS' };
+
+function renderFormats() {
+  const pick = (v) => { dl.fmt = v; store.set('fmt', v); renderFormats(); };
+  chipGroup($('#kindChips'), 'fmtKind', [
+    { value: 'mp4', label: 'Vídeo · MP4', sub: 'Imagem e som' },
+    { value: 'mp3', label: 'Áudio · MP3', sub: 'Só o som, funciona em tudo' },
+  ], dl.fmt, pick);
+  chipGroup($('#otherChips'), 'fmtOther', [
+    { value: 'm4a', label: 'M4A', sub: 'Melhor que MP3' },
+    { value: 'wav', label: 'WAV', sub: 'Sem perda, arquivo grande' },
+    { value: 'opus', label: 'OPUS', sub: 'Pequeno e moderno' },
+  ], dl.fmt, pick);
+  if (['m4a', 'wav', 'opus'].includes(dl.fmt)) $('#moreFmt').open = true;
+
+  const f = dl.fmt, box = $('#qualityBox');
+  const setQ = (v) => { dl.q[f] = v; renderFormats(); };
+  if (f === 'mp4') {
+    $('#qualityTitle').textContent = 'Resolução';
+    const hs = dl.heights;
+    const list = [2160, 1440, 1080, 720, 480, 360].filter((h) => !hs.length || hs.some((x) => x >= h * 0.95));
+    const opts = [{ value: '', label: 'Melhor', sub: hs.length ? hs[0] + 'p' : '' }, ...list.map((h) => ({ value: h, label: h + 'p' }))];
+    if (!opts.some((o) => String(o.value) === String(dl.q.mp4))) dl.q.mp4 = '';
+    chipGroup($('#qualityChips'), 'q', opts, dl.q.mp4, setQ);
+    box.classList.toggle('hidden', !list.length);
+  } else if (f === 'mp3' || f === 'm4a') {
+    $('#qualityTitle').textContent = 'Qualidade do áudio';
+    chipGroup($('#qualityChips'), 'q', [
+      { value: '320', label: '320 kbps', sub: 'Máxima' }, { value: '192', label: '192 kbps', sub: 'Recomendada' }, { value: '128', label: '128 kbps', sub: 'Menor arquivo' },
+    ], dl.q[f], setQ);
+    box.classList.remove('hidden');
+  } else box.classList.add('hidden');
+
+  const q = dl.q[f];
+  $('#btnDl').textContent = `Baixar ${FMT_NAME[f]}` + (f === 'mp4' ? (q ? ` · ${q}p` : '') : (q ? ` · ${q} kbps` : ''));
+}
+
+function resetDownload() {
+  if (dl.ctl) dl.ctl.abort();
+  dl.url = '';
+  $('#url').value = ''; syncUrlUi();
+  ['#dlFound', '#dlSearching', '#dlSearchErr'].forEach((s) => $(s).classList.add('hidden'));
+  clearPanels('dl');
+  $('#url').focus();
+}
+function syncUrlUi() {
+  const has = !!$('#url').value;
+  $('#btnClear').classList.toggle('hidden', !has);
+  $('#btnPaste').classList.toggle('hidden', has);
+  $('#urlField').classList.remove('bad');
+}
+
+async function search() {
+  const raw = $('#url').value;
+  if (!raw.trim()) { $('#url').focus(); return; }
+  const url = normUrl(raw);
+  if (!url) {
+    $('#urlField').classList.add('bad');
+    ['#dlFound', '#dlSearching'].forEach((s) => $(s).classList.add('hidden'));
+    showErr($('#dlSearchErr'), new Error('Unsupported URL: ' + raw.slice(0, 80)));
+    return;
+  }
+  $('#url').value = url; syncUrlUi();
+  if (dl.ctl) dl.ctl.abort();
+  const ctl = dl.ctl = new AbortController();
+  dl.url = url;
+  clearPanels('dl');
+  ['#dlFound', '#dlSearchErr'].forEach((s) => $(s).classList.add('hidden'));
+  $('#dlSearching').classList.remove('hidden');
+  $('#btnInfo').innerHTML = SPIN + 'Buscando';
+  $('#btnInfo').disabled = true;
+  const t0 = Date.now();
+  const tick = setInterval(() => {
+    const s = Math.round((Date.now() - t0) / 1000);
+    $('#searchMsg').textContent = s < 6 ? `Buscando informações… ${s}s` : `Ainda buscando… ${s}s. Alguns sites demoram mais.`;
+  }, 1000);
+  $('#searchMsg').textContent = 'Buscando informações…';
+  try {
+    const i = await post('/api/info', { url }, ctl.signal);
+    dl.heights = i.heights || [];
+    const img = $('#thumb');
+    img.onerror = () => { img.removeAttribute('src'); };
+    img.src = i.thumbnail || '';
+    $('#title').textContent = i.title || 'Sem título';
+    $('#meta').textContent = [i.uploader, i.site].filter(Boolean).join(' · ');
+    $('#dur').textContent = fmtDur(i.duration);
+    $('#dur').classList.toggle('hidden', !i.duration);
+    renderFormats();
+    $('#dlFound').classList.remove('hidden');
+    $('#btnDl').focus({ preventScroll: true });
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    showErr($('#dlSearchErr'), e);
+  } finally {
+    clearInterval(tick);
+    if (dl.ctl === ctl) { $('#dlSearching').classList.add('hidden'); $('#btnInfo').textContent = 'Buscar'; $('#btnInfo').disabled = busy.dl; }
+  }
+}
+
+$('#btnInfo').onclick = search;
+$('#url').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+$('#url').addEventListener('input', syncUrlUi);
+$('#url').addEventListener('paste', () => setTimeout(() => { if (normUrl($('#url').value)) search(); }, 0));
+$('#btnClear').onclick = resetDownload;
+$('#btnPaste').onclick = async () => {
+  try {
+    const t = await navigator.clipboard.readText();
+    $('#url').value = t.trim(); syncUrlUi();
+    if (normUrl(t)) search(); else $('#url').focus();
+  } catch { $('#url').focus(); $('#urlHint').textContent = 'O navegador bloqueou o acesso. Cole com Ctrl+V.'; }
+};
+// colar o link em qualquer lugar da página
+document.addEventListener('paste', (e) => {
+  if (e.target.closest('input,select,textarea') || busy.dl || $('#dl').classList.contains('hidden')) return;
+  const t = e.clipboardData?.getData('text') || '';
+  if (normUrl(t)) { $('#url').value = t.trim(); syncUrlUi(); search(); }
+});
+
+async function download() {
+  const url = dl.url, fmt = dl.fmt, quality = dl.q[fmt];
+  setBusy('dl', true);
+  try {
+    const { id } = await post('/api/download', { url, format: fmt, quality });
+    const { j } = await run('dl', id, 'Preparando…');
+    triggerSave(id, j.name);
+    showDone('dl', j, id, 'Baixar outro');
+  } catch (e) {
+    panels('dl').task.classList.add('hidden');
+    showErr(panels('dl').err, e, download);
+  }
+  setBusy('dl', false);
+}
+$('#btnDl').onclick = download;
+
+// ---------- CONVERTER ----------
+const cv = { file: null, target: store.get('cvTarget', 'mp3') };
+const AUDIO_T = ['mp3', 'm4a', 'wav', 'ogg'];
+const T_INFO = {
+  mp3: ['MP3', 'Funciona em tudo'], m4a: ['M4A', 'Melhor que MP3'], wav: ['WAV', 'Sem perda'], ogg: ['OGG', 'Aberto'],
+  mp4: ['MP4', 'Vídeo universal'], webm: ['WEBM', 'Para web'], gif: ['GIF', 'Animado, sem som'],
+};
+if (!T_INFO[cv.target]) cv.target = 'mp3';
+
+function isAudioFile(f) {
+  return /^audio\//.test(f.type) || /\.(mp3|m4a|wav|ogg|opus|aac|flac|wma)$/i.test(f.name);
+}
+function renderTargets() {
+  const pick = (v) => { cv.target = v; store.set('cvTarget', v); renderTargets(); };
+  const mk = (list) => list.map((t) => ({ value: t, label: T_INFO[t][0], sub: T_INFO[t][1] }));
+  chipGroup($('#cvAudioChips'), 'cvT1', mk(['mp3', 'm4a', 'wav', 'ogg']), cv.target, pick);
+  chipGroup($('#cvVideoChips'), 'cvT2', mk(['mp4', 'webm', 'gif']), cv.target, pick);
+
+  const t = cv.target, audioOut = AUDIO_T.includes(t), audioIn = cv.file && isAudioFile(cv.file);
+  $('#cvResBox').classList.toggle('hidden', audioOut || audioIn);
+  $('#cvBrBox').classList.toggle('hidden', t === 'wav' || t === 'gif');
+  $('#cvSelects').classList.toggle('hidden', $('#cvResBox').classList.contains('hidden') && $('#cvBrBox').classList.contains('hidden'));
+
+  let tip = 'Escolha o formato de saída e clique em Converter. O download começa sozinho.';
+  if (audioIn && t === 'mp4') tip = 'Um arquivo de áudio vira um vídeo com tela preta.';
+  else if (audioIn && t === 'gif') tip = 'Um GIF precisa de imagem. Escolha um arquivo de vídeo.';
+  else if (!audioIn && t === 'gif') tip = 'GIFs não têm som e ficam grandes. Use vídeos curtos (até ~15 s).';
+  else if (!audioIn && audioOut) tip = 'Só o áudio do vídeo será extraído.';
+  else if (!audioIn && t === 'mp4') tip = 'Para diminuir o tamanho de um vídeo, converta MP4 → MP4 com uma resolução menor.';
+  else if (t === 'wav') tip = 'WAV não tem compressão: o arquivo fica bem grande.';
+  $('#cvTip span').textContent = tip;
+  $('#btnCv').disabled = !cv.file || (audioIn && t === 'gif');
+  $('#btnCv').textContent = cv.file ? `Converter para ${T_INFO[t][0]}` : 'Converter';
+}
+
+function pickFile(f) {
+  if (!f) return;
+  clearPanels('cv');
+  if (f.size > maxMb * 1024 * 1024) {
+    showErr($('#cvErr'), new Error(`Arquivo maior que ${maxMb} MB (este tem ${fmtSize(f.size)})`));
+    return;
+  }
+  if (!/^(video|audio)\//.test(f.type) && !/\.(mkv|flac|opus|m4a|wma|aac|avi|mov|wmv|flv|ts|3gp)$/i.test(f.name)) {
+    showErr($('#cvErr'), new Error('Invalid data found: tipo não reconhecido'));
+    return;
+  }
+  cv.file = f;
+  $('#drop').classList.add('hidden');
+  $('#fileRow').classList.remove('hidden');
+  $('#cvOpts').classList.remove('hidden');
+  $('#fileIcon').innerHTML = isAudioFile(f) ? ICON.audio : ICON.video;
+  $('#fileName').textContent = f.name; $('#fileName').title = f.name;
+  $('#fileMeta').textContent = [isAudioFile(f) ? 'Áudio' : 'Vídeo', fmtSize(f.size)].join(' · ');
+  // áudio de entrada: sugere um formato de áudio diferente do original
+  const ext = (f.name.split('.').pop() || '').toLowerCase();
+  if (isAudioFile(f) && AUDIO_T.includes(cv.target) && cv.target === ext) cv.target = ext === 'mp3' ? 'm4a' : 'mp3';
+  renderTargets();
+}
+function resetConvert() {
+  cv.file = null; $('#file').value = '';
+  $('#fileRow').classList.add('hidden'); $('#cvOpts').classList.add('hidden'); $('#drop').classList.remove('hidden');
+  clearPanels('cv');
+  $('#drop').focus();
+}
+const openPicker = () => $('#file').click();
+$('#drop').onclick = openPicker;
+$('#drop').onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); } };
+$('#btnChange').onclick = openPicker;
+$('#file').onchange = (e) => { pickFile(e.target.files[0]); e.target.value = ''; };
+
+// arrastar e soltar em qualquer lugar da página
+let dragDepth = 0;
+const hasFiles = (e) => e.dataTransfer && [...e.dataTransfer.types].includes('Files');
+window.addEventListener('dragenter', (e) => { if (!hasFiles(e) || busy.cv) return; dragDepth++; $('#overlay').classList.remove('hidden'); });
+window.addEventListener('dragleave', (e) => { if (!hasFiles(e)) return; if (--dragDepth <= 0) { dragDepth = 0; $('#overlay').classList.add('hidden'); } });
+window.addEventListener('dragover', (e) => { if (hasFiles(e)) e.preventDefault(); });
+window.addEventListener('drop', (e) => {
+  if (!hasFiles(e)) return;
+  e.preventDefault(); dragDepth = 0; $('#overlay').classList.add('hidden');
+  if (busy.cv) return;
+  selectTab('cv');
+  pickFile(e.dataTransfer.files[0]);
+});
+
+async function convert() {
+  if (!cv.file) return;
+  const file = cv.file;
+  setBusy('cv', true);
+  try {
+    const q = new URLSearchParams({ target: cv.target, res: $('#cvRes').value, bitrate: $('#cvBr').value });
+    const r = await fetch('/api/convert?' + q, { method: 'POST', headers: { 'X-Filename': encodeURIComponent(file.name) }, body: file });
+    const j0 = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j0.error || 'Erro');
+    const { j } = await run('cv', j0.id, 'Enviando arquivo…');
+    triggerSave(j0.id, j.name);
+    showDone('cv', j, j0.id, 'Converter outro');
+  } catch (e) {
+    panels('cv').task.classList.add('hidden');
+    showErr(panels('cv').err, e, convert);
+  }
+  setBusy('cv', false);
+}
+$('#btnCv').onclick = convert;
+
+// ---------- início ----------
+fetch('/api/status').then((r) => r.json()).then((s) => {
+  if (s.maxUploadMB) { maxMb = s.maxUploadMB; $('#maxMb').textContent = maxMb; }
+  const miss = [];
+  if (!s.ytdlp) miss.push('o <b>yt-dlp</b> (rode <code>npm run setup</code>)');
+  if (!s.ffmpeg) miss.push('o <b>ffmpeg</b> (rode <code>npm install</code>)');
+  if (miss.length) { $('#bannerText').innerHTML = 'Falta instalar ' + miss.join(' e ') + '. Depois reinicie o Facilitador.'; $('#banner').classList.remove('hidden'); }
+}).catch(() => {});
+
+renderTargets();
+syncUrlUi();
+selectTab(['dl', 'cv'].includes(location.hash.slice(1)) ? location.hash.slice(1) : store.get('tab', 'dl'));
+if (!$('#dl').classList.contains('hidden')) $('#url').focus();
+</script>
+</body>
+</html>
