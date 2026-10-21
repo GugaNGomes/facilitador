@@ -2,3 +2,4 @@ node_modules
 bin
 .git
 *.md
+public/vendor

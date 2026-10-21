@@ -1,0 +1,10 @@
+{
+  "buildCommand": "node setup.js && node scripts/vendor.js",
+  "outputDirectory": "public",
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 300,
+      "includeFiles": "{bin/**,node_modules/ffmpeg-static/ffmpeg}"
+    }
+  }
+}

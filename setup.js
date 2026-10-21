@@ -1,4 +1,4 @@
-// Baixa (ou atualiza) o yt-dlp para ./bin
+// Baixa (ou atualiza) o yt-dlp para ./bin e garante o binario do ffmpeg-static
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -29,6 +29,7 @@ function get(u, redirects = 0) {
         fs.renameSync(tmp, dest);
         if (!win) fs.chmodSync(dest, 0o755);
         console.log('yt-dlp instalado em ' + dest);
+        ensureFfmpeg();
       });
     });
   }).on('error', (e) => {
@@ -39,3 +40,13 @@ function get(u, redirects = 0) {
 
 console.log('Baixando ' + url);
 get(url);
+
+// O npm recente nao roda o postinstall do ffmpeg-static sem aprovacao; baixa na mao se faltar.
+function ensureFfmpeg() {
+  let p;
+  try { p = require('ffmpeg-static'); } catch { return; }
+  if (p && fs.existsSync(p)) return console.log('ffmpeg ok: ' + p);
+  console.log('Baixando ffmpeg...');
+  const r = require('child_process').spawnSync(process.execPath, [path.join(__dirname, 'node_modules', 'ffmpeg-static', 'install.js')], { stdio: 'inherit' });
+  if (r.status !== 0 || !fs.existsSync(p)) { console.error('Falha ao baixar o ffmpeg'); process.exit(1); }
+}

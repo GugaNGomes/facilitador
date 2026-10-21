@@ -12,6 +12,7 @@ COPY package.json ./
 # ffmpeg-static nao e necessario aqui (ja temos o ffmpeg do sistema)
 RUN npm install --omit=dev --ignore-scripts
 COPY server.js ./
+COPY lib ./lib
 COPY public ./public
 
 ENV HOST=0.0.0.0 \
